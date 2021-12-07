@@ -56,7 +56,6 @@ int main()
 
     if (result) {
         buffer[numBytesRead / sizeof(wchar_t)] = '\0'; // null terminate the string
-        wcout << "Number of bytes read: " << numBytesRead << endl;
         wcout << "Message: " << buffer << endl;
     }
     else {
@@ -78,6 +77,28 @@ int main()
         &numBytesWritten, // will store actual amount of data sent
         NULL // not using overlapped IO
     );
+
+
+    wcout << "Reading data from pipe..." << endl;
+    // The read operation will block until there is data to read
+    buffer[128];
+    numBytesRead = 0;
+    result = ReadFile(
+        pipe,
+        buffer, // the data from the pipe will be put here
+        127 * sizeof(wchar_t), // number of bytes allocated
+        &numBytesRead, // this will store number of bytes actually read
+        NULL // not using overlapped IO
+    );
+    if (result) {
+        buffer[numBytesRead / sizeof(wchar_t)] = '\0'; // null terminate the string
+        wcout << "Messsage added" << endl;
+        wcout << buffer << endl;
+    }
+    else {
+        wcout << "Failed to read data from the pipe." << endl;
+    }
+
     // Close our pipe handle
     CloseHandle(pipe);
 
