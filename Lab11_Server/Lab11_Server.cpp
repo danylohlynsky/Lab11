@@ -1,5 +1,6 @@
 #include <iostream>
 #include <windows.h>
+#include <fstream>
 using namespace std;
 
 int main(int argc, const char** argv) {
@@ -36,6 +37,32 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
+    wcout << "Reading name from client..." << endl;
+    // The read operation will block until there is data to read
+    wchar_t buffer[128];
+    DWORD numBytesRead = 0;
+    result = ReadFile(
+        pipe,
+        buffer, // the data from the pipe will be put here
+        127 * sizeof(wchar_t), // number of bytes allocated
+        &numBytesRead, // this will store number of bytes actually read
+        NULL // not using overlapped IO
+    );
+
+    if (result) {
+        buffer[numBytesRead / sizeof(wchar_t)] = '\0'; // null terminate the string
+        wstring ws(buffer);
+        string name(ws.begin(), ws.end());
+        ofstream myfile;
+        myfile.open("C:\\Users\\Danylko\\source\\repos\\LPNU\\OS\\Lab11\\Users.txt");
+        myfile << name + "\n";
+        myfile.close();
+    }
+    else {
+        wcout << "Failed to read data from the pipe." << endl;
+    }
+
+
     wcout << "Sending data to pipe..." << endl;
 
     // This call blocks until a client process reads all the data
@@ -59,8 +86,8 @@ int main(int argc, const char** argv) {
 
     wcout << "Reading data from client..." << endl;
     // The read operation will block until there is data to read
-    wchar_t buffer[128];
-    DWORD numBytesRead = 0;
+    buffer[128];
+    numBytesRead = 0;
     result = ReadFile(
         pipe,
         buffer, // the data from the pipe will be put here
