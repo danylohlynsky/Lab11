@@ -54,19 +54,20 @@ int main(int argc, const char** argv) {
         wstring ws(buffer);
         string name(ws.begin(), ws.end());
         ofstream myfile;
-        myfile.open("C:\\Users\\Danylko\\source\\repos\\LPNU\\OS\\Lab11\\Users.txt");
+        myfile.open("C:\\Users\\Danylko\\source\\repos\\LPNU\\OS\\Lab11\\Users.txt", ios_base::app);
+        string fileData;
         myfile << name + "\n";
         myfile.close();
     }
     else {
-        wcout << "Failed to read data from the pipe." << endl;
+        wcout << "Failed to read name from the pipe." << endl;
     }
 
 
     wcout << "Sending data to pipe..." << endl;
 
     // This call blocks until a client process reads all the data
-    const wchar_t* data = L"*** Hello Pipe World ***";
+    const wchar_t* data = L"Your name successfully added";
     DWORD numBytesWritten = 0;
     result = WriteFile(
         pipe, // handle to our outbound pipe
@@ -103,6 +104,26 @@ int main(int argc, const char** argv) {
     }
     else {
         wcout << "Failed to read data from the pipe." << endl;
+    }
+
+    wcout << "Sending data to pipe..." << endl;
+    // This call blocks until a client process reads all the data
+    data = buffer;
+    numBytesWritten = 0;
+    result = WriteFile(
+        pipe, // handle to our outbound pipe
+        data, // data to send
+        wcslen(data) * sizeof(wchar_t), // length of data to send (bytes)
+        &numBytesWritten, // will store actual amount of data sent
+        NULL // not using overlapped IO
+    );
+
+    if (result) {
+        wcout << "Number of bytes sent: " << numBytesWritten << endl;
+    }
+    else {
+        wcout << "Failed to send data." << endl;
+        // look up error code here using GetLastError()
     }
     // Close the pipe (automatically disconnects client too)
     CloseHandle(pipe);
