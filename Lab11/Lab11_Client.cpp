@@ -27,11 +27,26 @@ int main()
         return 1;
     }
 
+    // Sending name to server 
+    wcout << "Enter your name:" << endl;
+    string name;
+    getline(cin, name);
+    wstring widestr = wstring(name.begin(), name.end());
+    const wchar_t* data = widestr.c_str();
+    DWORD numBytesWritten = 0;
+    BOOL result = WriteFile(
+        pipe, // handle to our outbound pipe
+        data, // data to send
+        wcslen(data) * sizeof(wchar_t), // length of data to send (bytes)
+        &numBytesWritten, // will store actual amount of data sent
+        NULL // not using overlapped IO
+    );
+
     wcout << "Reading data from pipe..." << endl;
     // The read operation will block until there is data to read
     wchar_t buffer[128];
     DWORD numBytesRead = 0;
-    BOOL result = ReadFile(
+    result = ReadFile(
         pipe,
         buffer, // the data from the pipe will be put here
         127 * sizeof(wchar_t), // number of bytes allocated
@@ -50,14 +65,12 @@ int main()
     wcout << "Sending data to server..." << endl;
 
     // This call blocks until a client process reads all the data
-    
-    
     wcout << "Enter any message:" << endl;
     string data1;
     getline(cin, data1);
-    wstring widestr = wstring(data1.begin(), data1.end());
-    const wchar_t* data = widestr.c_str();
-    DWORD numBytesWritten = 0;
+    widestr = wstring(data1.begin(), data1.end());
+    data = widestr.c_str();
+    numBytesWritten = 0;
     result = WriteFile(
         pipe, // handle to our outbound pipe
         data, // data to send
