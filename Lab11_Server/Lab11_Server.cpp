@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <fstream>
 #include <vector>
+#include <string>
 using namespace std;
 HANDLE hMutex;
 HANDLE myH = CreateMutex(0, FALSE, (LPCWSTR)"Globa\\myH");
@@ -76,7 +77,18 @@ int main(int argc, const char** argv) {
         ifstream myfileRead;
         myfileRead.open("Users.txt");
         string fileData;
-        myfileRead >> fileData;
+        string line;
+
+        int index = 0;
+        if (myfileRead.is_open())
+        {
+            getline(myfileRead, line);
+            while (myfileRead)
+            {
+                fileData += line;
+                getline(myfileRead, line);
+            }
+        }
         myfileRead.close();
         
         if (fileData.find(name) == std::string::npos) {
@@ -87,6 +99,7 @@ int main(int argc, const char** argv) {
         }
         else
             data = L"You are already registered:)";
+
     }
     else {
         wcout << "Failed to read name from the pipe." << endl;
