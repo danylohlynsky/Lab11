@@ -21,6 +21,7 @@ DWORD WINAPI MassageChecker(__in LPVOID params) {
             counter++;
             ReleaseMutex(myH);
     }
+    return 0;
 }
 int main(int argc, const char** argv) {
     wcout << "Creating an instance of a named pipe..." << endl;
@@ -83,7 +84,7 @@ int main(int argc, const char** argv) {
     }
 
 
-    wcout << "Sending data to pipe..." << endl;
+    wcout << "Sending data to pipe..." << endl; 
 
     // This call blocks until a client process reads all the data
     const wchar_t* data = L"Your name successfully added";
