@@ -84,8 +84,9 @@ int main(int argc, const char** argv) {
             myfile.open("Users.txt", ios_base::app);
             myfile << name + "\n";
             myfile.close();
-            data = L"You are already registered:)";
         }
+        else
+            data = L"You are already registered:)";
     }
     else {
         wcout << "Failed to read name from the pipe." << endl;
