@@ -18,7 +18,7 @@ DWORD WINAPI MassageChecker(__in LPVOID params) {
     
     pr parameters = *(pr*)params;
     for (string word : parameters.words) {
-        if (word.compare(parameters.wordToCheck)) {
+        if (word.compare(parameters.wordToCheck) == 0) {
             WaitForSingleObject(myH, INFINITE);
             counter++;
             ReleaseMutex(myH);
@@ -149,6 +149,7 @@ int main(int argc, const char** argv) {
             words.push_back(token);
             message.erase(0, pos + delimiter.length());
         }
+        words.push_back(message);
 
         HANDLE* h = new HANDLE[sizeof(prohibitedWords)/sizeof(*prohibitedWords)];
         pr* par = new pr[sizeof(prohibitedWords) / sizeof(*prohibitedWords)];
