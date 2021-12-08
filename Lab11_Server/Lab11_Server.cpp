@@ -1,15 +1,34 @@
 #include <iostream>
 #include <windows.h>
 #include <fstream>
+#include <vector>
 using namespace std;
-
+HANDLE hMutex;
+HANDLE myH = CreateMutex(0, FALSE, (LPCWSTR)"Globa\\myH");
+int counter = 0;
+string prohibitedWords[] = { "NULP", "OS", "Some", "KRUK", "other" };
+int prohibitedAmount = 3;
+struct pr {
+    vector <string> words;
+    string wordToCheck;
+};
+DWORD WINAPI MassageChecker(__in LPVOID params) {
+    WaitForSingleObject(myH, INFINITE);
+    pr parameters = *(pr*)params;
+    for (string word : parameters.words) {
+        WaitForSingleObject(hMutex, INFINITE);
+        if (word == parameters.wordToCheck)
+            counter++;
+    }
+    ReleaseMutex(myH);
+}
 int main(int argc, const char** argv) {
     wcout << "Creating an instance of a named pipe..." << endl;
 
     // Create a pipe to send data
     HANDLE pipe = CreateNamedPipe(
         L"\\\\.\\pipe\\my_pipe", // name of the pipe
-        PIPE_ACCESS_DUPLEX, // 1-way pipe -- send only
+        PIPE_ACCESS_DUPLEX, 
         PIPE_TYPE_BYTE, // send data as a byte stream
         1, // only allow 1 instance of this pipe
         0, // no outbound buffer
@@ -85,7 +104,7 @@ int main(int argc, const char** argv) {
         // look up error code here using GetLastError()
     }
 
-    wcout << "Reading data from client..." << endl;
+    wcout << "Reading client message..." << endl;
     // The read operation will block until there is data to read
     buffer[128];
     numBytesRead = 0;
@@ -105,10 +124,37 @@ int main(int argc, const char** argv) {
     else {
         wcout << "Failed to read data from the pipe." << endl;
     }
+    wstring ws1(buffer);
+    string message(ws1.begin(), ws1.end());
+    vector<string> words{};
+    string delimiter = " ";
+    size_t pos = 0;
+    string token;
+    while ((pos = message.find(delimiter)) != string::npos) {
+        token = message.substr(0, pos);
+        words.push_back(token);
+        message.erase(0, pos + delimiter.length());
+    }
+    HANDLE* h = new HANDLE[prohibitedAmount];
+    pr* par = new pr[prohibitedAmount];
+    int i = 0;
+    for (string w : prohibitedWords) {
+        DWORD threadID;
+        par[i].words = words;
+        par[i].wordToCheck = w;
+        h[i] = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)MassageChecker, (LPVOID)&par[i], NULL, &threadID);
+    }
+    WaitForMultipleObjects(prohibitedAmount, h, FALSE, INFINITE);
+
 
     wcout << "Sending data to pipe..." << endl;
     // This call blocks until a client process reads all the data
-    data = buffer;
+    
+    if (counter < prohibitedAmount)
+        data = buffer;
+    else
+        data = L"Too many prohibited words in your message!";
+
     numBytesWritten = 0;
     result = WriteFile(
         pipe, // handle to our outbound pipe
