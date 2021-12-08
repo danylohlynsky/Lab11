@@ -68,26 +68,31 @@ int main(int argc, const char** argv) {
         &numBytesRead, // this will store number of bytes actually read
         NULL // not using overlapped IO
     );
-
+    const wchar_t* data = L"Your name successfully added";
     if (result) {
         buffer[numBytesRead / sizeof(wchar_t)] = '\0'; // null terminate the string
         wstring ws(buffer);
         string name(ws.begin(), ws.end());
-        ofstream myfile;
-        myfile.open("Users.txt", ios_base::app);
+        ifstream myfileRead;
+        myfileRead.open("Users.txt");
         string fileData;
-        myfile << name + "\n";
-        myfile.close();
+        myfileRead >> fileData;
+        myfileRead.close();
+        
+        if (fileData.find(name) == std::string::npos) {
+            ofstream myfile;
+            myfile.open("Users.txt", ios_base::app);
+            myfile << name + "\n";
+            myfile.close();
+            data = L"You are already registered:)";
+        }
     }
     else {
         wcout << "Failed to read name from the pipe." << endl;
     }
 
-
     wcout << "Sending data to pipe..." << endl; 
-
     // This call blocks until a client process reads all the data
-    const wchar_t* data = L"Your name successfully added";
     DWORD numBytesWritten = 0;
     result = WriteFile(
         pipe, // handle to our outbound pipe
