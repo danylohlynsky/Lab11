@@ -13,14 +13,14 @@ struct pr {
     string wordToCheck;
 };
 DWORD WINAPI MassageChecker(__in LPVOID params) {
-    WaitForSingleObject(myH, INFINITE);
+    
     pr parameters = *(pr*)params;
     for (string word : parameters.words) {
-        WaitForSingleObject(hMutex, INFINITE);
         if (word == parameters.wordToCheck)
+            WaitForSingleObject(myH, INFINITE);
             counter++;
+            ReleaseMutex(myH);
     }
-    ReleaseMutex(myH);
 }
 int main(int argc, const char** argv) {
     wcout << "Creating an instance of a named pipe..." << endl;
@@ -73,7 +73,7 @@ int main(int argc, const char** argv) {
         wstring ws(buffer);
         string name(ws.begin(), ws.end());
         ofstream myfile;
-        myfile.open("C:\\Users\\Danylko\\source\\repos\\LPNU\\OS\\Lab11\\Users.txt", ios_base::app);
+        myfile.open("Users.txt", ios_base::app);
         string fileData;
         myfile << name + "\n";
         myfile.close();

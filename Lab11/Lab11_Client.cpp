@@ -92,7 +92,6 @@ int main()
     );
     if (result) {
         buffer[numBytesRead / sizeof(wchar_t)] = '\0'; // null terminate the string
-        wcout << "Messsage added" << endl;
         wcout << buffer << endl;
     }
     else {
